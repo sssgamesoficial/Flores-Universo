@@ -46,9 +46,10 @@
   scene.add(semilla);
 
   // Estrellas
-  const estrellaTexture = new THREE.TextureLoader().load("estrella.png");
+  const estrellas = [];
+const estrellaTexture = new THREE.TextureLoader().load("estrella.png");
 
-  for (let i = 0; i < 300; i++) {
+for (let i = 0; i < 300; i++) {
 
   const material = new THREE.SpriteMaterial({
     map: estrellaTexture,
@@ -67,11 +68,13 @@
   estrella.scale.set(tamaño, tamaño, tamaño);
 
   scene.add(estrella);
+  estrellas.push(estrella);
 }
 
   // 🌻 Cargar textura de girasol
   const textureLoader = new THREE.TextureLoader();
   const girasolTexture = textureLoader.load("planta.png");
+  
 
   const mensajes = [
     "Eres mi sol 💛",
@@ -120,6 +123,7 @@
 
     flor.scale.set(1.5, 1.5, 1.5);
     scene.add(flor);
+    flor.userData = {offset: Math.random() * Math.PI * 2};
 
     // 💬 mensaje
     const mensaje = crearTexto3D(
@@ -130,6 +134,19 @@
     mensaje.position.y += 1;
 
     scene.add(mensaje);
+    const puntos = [
+    flor.position,
+    mensaje.position
+    ];
+
+  const geometry = new THREE.BufferGeometry().setFromPoints(puntos);
+
+  const materialLinea = new THREE.LineBasicMaterial({
+  color: 0xffffaa
+  });
+
+  const linea = new THREE.Line(geometry, materialLinea);
+  scene.add(linea);
   });
 
   // Movimiento con mouse
@@ -142,17 +159,38 @@
   });
 
   function animate() {
-    requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 
-    camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
-    camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
+  const tiempo = Date.now() * 0.001;
 
-    camera.lookAt(scene.position);
+  // Movimiento cámara
+  camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+  camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
+  camera.lookAt(scene.position);
 
-    renderer.render(scene, camera);
-  }
+  // ✨ mover estrellas
+  estrellas.forEach(estrella => {
+    estrella.position.z += 0.01;
 
-  animate();
+    if (estrella.position.z > 10) {
+      estrella.position.z = -50;
+    }
+
+    // ✨ parpadeo
+    estrella.material.opacity = 0.5 + Math.sin(tiempo * 2) * 0.5;
+  });
+
+  // 🌻 flores flotando
+  scene.children.forEach(obj => {
+    if (obj.type === "Sprite" && obj.userData.offset !== undefined) {
+      obj.position.y += Math.sin(tiempo + obj.userData.offset) * 0.002;
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+
+animate();
 </script>
 
 </body>
