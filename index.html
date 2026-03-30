@@ -62,13 +62,20 @@ for (let i = 0; i < 300; i++) {
     (Math.random() - 0.5) * 50,
     (Math.random() - 0.5) * 50,
     (Math.random() - 0.5) * 50
-
-  estrella.userData = {
-  offset: Math.random() * Math.PI * 2,
-  velocidad: Math.random() * 2 + 0.5
-  };
   
   );
+
+  estrella.position.set(
+  (Math.random() - 0.5) * 50,
+  (Math.random() - 0.5) * 50,
+  (Math.random() - 0.5) * 50
+  );
+
+// 👇 ESTO VA FUERA
+estrella.userData = {
+  offset: Math.random() * Math.PI * 2,
+  velocidad: Math.random() * 2 + 0.5
+};
 
   const tamaño = Math.random() * 0.5 + 0.1;
   estrella.scale.set(tamaño, tamaño, tamaño);
