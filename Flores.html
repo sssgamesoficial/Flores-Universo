@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Universo de flores</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.z = 5;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Luz
+  const light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(10, 10, 10);
+  scene.add(light);
+
+  // Semilla
+  const geo = new THREE.SphereGeometry(0.5, 32, 32);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
+  const semilla = new THREE.Mesh(geo, mat);
+  scene.add(semilla);
+
+  // Estrellas
+  const estrellasGeometry = new THREE.BufferGeometry();
+  const estrellasMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+
+  const estrellasVertices = [];
+  for (let i = 0; i < 1000; i++) {
+    estrellasVertices.push(
+      (Math.random() - 0.5) * 50,
+      (Math.random() - 0.5) * 50,
+      (Math.random() - 0.5) * 50
+    );
+  }
+
+  estrellasGeometry.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute(estrellasVertices, 3)
+  );
+
+  const estrellas = new THREE.Points(estrellasGeometry, estrellasMaterial);
+  scene.add(estrellas);
+
+  // 🌻 Cargar textura de girasol
+  const textureLoader = new THREE.TextureLoader();
+  const girasolTexture = textureLoader.load("https://imgur.com/a/A4TXr5u#Vq94cdo.png");
+
+  const mensajes = [
+    "Eres mi sol 💛",
+    "Contigo todo florece 🌻",
+    "Siempre tú ✨",
+    "Eres mi paz",
+    "Me haces feliz 💕"
+  ];
+
+  // Crear texto en canvas (truco pro 🔥)
+  function crearTexto3D(texto) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    canvas.width = 256;
+    canvas.height = 128;
+
+    context.fillStyle = "white";
+    context.font = "20px Arial";
+    context.fillText(texto, 10, 50);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture });
+
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(2, 1, 1);
+
+    return sprite;
+  }
+
+  // Click → crear girasol + mensaje
+  window.addEventListener("click", () => {
+
+    const materialFlor = new THREE.SpriteMaterial({
+      map: girasolTexture,
+      transparent: true
+    });
+
+    const flor = new THREE.Sprite(materialFlor);
+
+    flor.position.set(
+      (Math.random() - 0.5) * 6,
+      (Math.random() - 0.5) * 6,
+      (Math.random() - 0.5) * 6
+    );
+
+    flor.scale.set(1.5, 1.5, 1.5);
+    scene.add(flor);
+
+    // 💬 mensaje
+    const mensaje = crearTexto3D(
+      mensajes[Math.floor(Math.random() * mensajes.length)]
+    );
+
+    mensaje.position.copy(flor.position);
+    mensaje.position.y += 1;
+
+    scene.add(mensaje);
+  });
+
+  // Movimiento con mouse
+  let mouseX = 0;
+  let mouseY = 0;
+
+  document.addEventListener("mousemove", (event) => {
+    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+    camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
+
+    camera.lookAt(scene.position);
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+</script>
+
+</body>
+</html>
